@@ -1,17 +1,31 @@
+# ─── Stage 1: Build TypeScript ────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install all dependencies (including devDependencies for tsc)
+COPY package*.json ./
+RUN npm ci
+
+# Copy source and compile
+COPY tsconfig.json ./
+COPY src ./src
+COPY settings.json ./
+RUN npm run build
+
+# ─── Stage 2: Production image ────────────────────────────────────────────────
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Only install production dependencies
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Copy application source
-COPY . .
-
-# Remove dev files
-RUN rm -f .env.example
+# Copy compiled output and runtime assets
+COPY --from=builder /app/dist ./dist
+COPY settings.json ./
 
 EXPOSE 3000
 
-CMD ["node", "app.js"]
+CMD ["node", "dist/app.js"]
