@@ -134,7 +134,7 @@ export class LoginComponent {
       next: (res) => {
         this.loading.set(false);
         if (res.success) {
-          this.router.navigate(['/projects']);
+          this.router.navigate(['/dashboard']);
         } else {
           this.errorMessage.set(res.message || 'Erreur de connexion');
         }

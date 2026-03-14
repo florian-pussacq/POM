@@ -1,14 +1,24 @@
-<!-- Client -->
+<!-- Client (v1) -->
 /client/node_modules
 /client/dist
 /client/.tmp
 /client/bower_components
 /client/npm-debug.*
 
-<!-- Server -->
+<!-- Server (v1) -->
 /server/node_modules
 /server/npm-debug.*
+
+<!-- Client (v2 - Angular) -->
+/client-ng/node_modules
+/client-ng/dist
+/client-ng/.angular
+
+<!-- Server (v2 - Express) -->
+/server-v2/node_modules
+/server-v2/.env
 
 .idea
 utils
 npm-debug.*
+*.log

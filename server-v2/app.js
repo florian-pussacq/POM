@@ -61,8 +61,10 @@ if (process.env.NODE_ENV !== 'test') {
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
+app.use('/api/projects/:projectId/tasks', require('./routes/tasks'));
 app.use('/api/collaborators', require('./routes/collaborators'));
 app.use('/api/budgets', require('./routes/budgets'));
+app.use('/api/settings', require('./routes/settings'));
 app.use('/api/version', require('./routes/version'));
 
 // ─── 404 ─────────────────────────────────────────────────────────────────────

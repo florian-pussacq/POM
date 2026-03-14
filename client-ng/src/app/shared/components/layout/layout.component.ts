@@ -29,6 +29,10 @@ import { AuthService } from '../../../core/services/auth.service';
           <span>POM</span>
         </mat-toolbar>
         <mat-nav-list>
+          <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>dashboard</mat-icon>
+            <span matListItemTitle>Tableau de bord</span>
+          </a>
           <a mat-list-item routerLink="/projects" routerLinkActive="active-link">
             <mat-icon matListItemIcon>folder</mat-icon>
             <span matListItemTitle>Projets</span>

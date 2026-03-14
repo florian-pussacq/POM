@@ -12,7 +12,7 @@ const taskSchema = new mongoose.Schema(
     date_fin_reelle: Date,
     statut: {
       type: String,
-      enum: ['Initial', 'En cours', 'Terminé', 'Annulé'],
+      enum: ['Initial', 'En cours', 'Terminé(e)', 'Annulé(e)'],
       default: 'Initial',
     },
     projet_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },

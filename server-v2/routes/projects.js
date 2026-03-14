@@ -25,6 +25,28 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// ─── GET /api/projects/generate-code ────────────────────────────────────────
+// Returns the next available project code for the current year
+router.get('/generate-code', requireRole('admin', 'manager'), async (req, res, next) => {
+  try {
+    const year = req.query.year || new Date().getFullYear();
+    const prefix = `${year}P`;
+
+    const projects = await Project.find({ code: { $regex: `^${year}P` } }).select('code');
+    let maxNum = 0;
+    for (const p of projects) {
+      if (p.code) {
+        const num = parseInt(p.code.slice(5), 10);
+        if (!isNaN(num) && num > maxNum) maxNum = num;
+      }
+    }
+    const nextCode = `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
+    res.json({ code: nextCode });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ─── GET /api/projects/:id ───────────────────────────────────────────────────
 router.get(
   '/:id',
@@ -49,7 +71,7 @@ router.post(
   requireRole('admin', 'manager'),
   [
     body('nom').trim().notEmpty().withMessage('Nom requis'),
-    body('statut').optional().isIn(['Initial', 'En cours', 'Terminé', 'Annulé', 'Supprimé']),
+    body('statut').optional().isIn(['Initial', 'En cours', 'Terminé(e)', 'Annulé(e)', 'Archivé']),
   ],
   validate,
   async (req, res, next) => {
@@ -73,7 +95,9 @@ router.put(
       const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true,
-      });
+      })
+        .populate('chef_projet', 'nom prenom pseudo')
+        .populate('collaborateurs', 'nom prenom pseudo');
       if (!project) return res.status(404).json({ success: false, message: 'Projet introuvable' });
       res.json(project);
     } catch (err) {

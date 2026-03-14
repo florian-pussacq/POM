@@ -1,27 +1,24 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from "@angular/material/chips";
-import { DecimalPipe } from "@angular/common";
-import { HttpClient } from '@angular/common/http';
+import { MatChipsModule } from '@angular/material/chips';
+import { TaskService } from '../../../core/services/task.service';
 import { ProjectService } from '../../../core/services/project.service';
-import { BudgetService } from '../../../core/services/budget.service';
-import { CollaboratorService } from '../../../core/services/collaborator.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { Budget } from '../../../core/models/budget.model';
+import { SettingsService } from '../../../core/services/settings.service';
+import { generateTaskCode } from '../../../core/services/stats.utils';
 import { Collaborator } from '../../../core/models/collaborator.model';
-import { environment } from '../../../../environments/environment';
+import { Project } from '../../../core/models/project.model';
 
 @Component({
-  selector: 'app-projects-create',
+  selector: 'app-tasks-create',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -31,18 +28,17 @@ import { environment } from '../../../../environments/environment';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatProgressSpinnerModule,
     MatChipsModule,
-    DecimalPipe,
   ],
   template: `
     <mat-card>
       <mat-card-header>
-        <mat-card-title>Nouveau projet</mat-card-title>
-        @if (generatedCode()) {
-          <mat-card-subtitle>Code : <code>{{ generatedCode() }}</code></mat-card-subtitle>
+        <mat-card-title>Nouvelle tâche</mat-card-title>
+        @if (project()) {
+          <mat-card-subtitle>Projet : {{ project()!.nom }}</mat-card-subtitle>
         }
       </mat-card-header>
       <mat-card-content>
@@ -51,35 +47,18 @@ import { environment } from '../../../../environments/environment';
         }
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nom du projet *</mat-label>
-            <input matInput formControlName="nom" />
-            @if (form.get('nom')?.hasError('required') && form.get('nom')?.touched) {
-              <mat-error>Nom requis</mat-error>
+            <mat-label>Libellé *</mat-label>
+            <input matInput formControlName="libelle" />
+            @if (form.get('libelle')?.hasError('required') && form.get('libelle')?.touched) {
+              <mat-error>Libellé requis</mat-error>
             }
           </mat-form-field>
 
-          <div class="row">
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Date de début *</mat-label>
-              <input matInput [matDatepicker]="pickerDebut" formControlName="date_debut"
-                [min]="today" [matDatepickerFilter]="workDayFilter" />
-              <mat-datepicker-toggle matIconSuffix [for]="pickerDebut"></mat-datepicker-toggle>
-              <mat-datepicker #pickerDebut></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Date de fin théorique *</mat-label>
-              <input matInput [matDatepicker]="pickerFin" formControlName="date_fin_theorique"
-                [min]="today" [matDatepickerFilter]="workDayFilter" />
-              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
-              <mat-datepicker #pickerFin></mat-datepicker>
-            </mat-form-field>
-          </div>
-
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Ligne budgétaire *</mat-label>
-            <mat-select formControlName="budget_id">
-              @for (b of budgets(); track b._id) {
-                <mat-option [value]="b._id">{{ b.libelle }} ({{ b.montant | number:'1.0-0' }} €)</mat-option>
+            <mat-label>Catégorie *</mat-label>
+            <mat-select formControlName="categorie">
+              @for (c of categories(); track c) {
+                <mat-option [value]="c">{{ c }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -89,8 +68,25 @@ import { environment } from '../../../../environments/environment';
             <textarea matInput formControlName="description" rows="3"></textarea>
           </mat-form-field>
 
+          <div class="row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Date de début</mat-label>
+              <input matInput [matDatepicker]="pickerDebut" formControlName="date_debut"
+                [min]="minDate()" [max]="maxDate()" [matDatepickerFilter]="workDayFilter" />
+              <mat-datepicker-toggle matIconSuffix [for]="pickerDebut"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDebut></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Date de fin théorique</mat-label>
+              <input matInput [matDatepicker]="pickerFin" formControlName="date_fin_theorique"
+                [min]="minDate()" [max]="maxDate()" [matDatepickerFilter]="workDayFilter" />
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+
           <div class="collaborators-section">
-            <strong>Collaborateurs ({{ selectedCollaborators.length }} sélectionnés)</strong>
+            <strong>Collaborateurs affectés</strong>
             <div class="chips-row">
               @for (c of collaborators(); track c._id) {
                 <mat-chip-option
@@ -104,7 +100,7 @@ import { environment } from '../../../../environments/environment';
           </div>
 
           <div class="actions">
-            <a mat-button routerLink="/projects">Annuler</a>
+            <a mat-button [routerLink]="['..']">Annuler</a>
             <button mat-raised-button color="primary" type="submit" [disabled]="loading() || form.invalid">
               @if (loading()) { <mat-spinner diameter="20" /> } @else { Créer }
             </button>
@@ -121,19 +117,20 @@ import { environment } from '../../../../environments/environment';
     .error-banner { background: #fdecea; color: #b00020; padding: 12px; border-radius: 4px; margin-bottom: 12px; }
     .collaborators-section { margin-bottom: 16px; }
     .chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    code { font-family: monospace; }
   `],
 })
-export class ProjectsCreateComponent implements OnInit {
+export class TasksCreateComponent implements OnInit {
   readonly form: FormGroup;
   readonly loading = signal(false);
   readonly error = signal('');
-  readonly budgets = signal<Budget[]>([]);
+  readonly categories = signal<string[]>([]);
   readonly collaborators = signal<Collaborator[]>([]);
-  readonly generatedCode = signal('');
-  readonly today = new Date();
+  readonly project = signal<Project | null>(null);
+  readonly minDate = signal<Date | null>(null);
+  readonly maxDate = signal<Date | null>(null);
 
-  selectedCollaborators: string[] = [];
+  private projectId = '';
+  private selectedCollaborators: string[] = [];
 
   readonly workDayFilter = (date: Date | null): boolean => {
     if (!date) return true;
@@ -143,38 +140,38 @@ export class ProjectsCreateComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private taskService: TaskService,
     private projectService: ProjectService,
-    private budgetService: BudgetService,
-    private collaboratorService: CollaboratorService,
-    private auth: AuthService,
-    private http: HttpClient,
-    private router: Router
+    private settingsService: SettingsService
   ) {
     this.form = this.fb.group({
-      nom: ['', Validators.required],
-      date_debut: [null, Validators.required],
-      date_fin_theorique: [null, Validators.required],
-      budget_id: ['', Validators.required],
+      libelle: ['', Validators.required],
+      categorie: ['', Validators.required],
       description: [''],
+      date_debut: [new Date()],
+      date_fin_theorique: [new Date()],
     });
   }
 
   ngOnInit(): void {
-    this.budgetService.getAll().subscribe({ next: (b) => this.budgets.set(b) });
+    this.projectId = this.route.snapshot.paramMap.get('id') || '';
 
-    this.collaboratorService.getAll().subscribe({
-      next: (all) => {
-        const currentId = this.auth.currentUser()?._id;
-        // Exclude current user from the picker (they are auto-added)
-        this.collaborators.set(all.filter((c) => c._id !== currentId));
-      },
+    this.settingsService.getCategories().subscribe({
+      next: (cats) => this.categories.set(cats),
     });
 
-    // Fetch auto-generated project code
-    const year = new Date().getFullYear();
-    this.http
-      .get<{ code: string }>(`${environment.apiUrl}/projects/generate-code?year=${year}`)
-      .subscribe({ next: (r) => this.generatedCode.set(r.code) });
+    this.projectService.getById(this.projectId).subscribe({
+      next: (p) => {
+        this.project.set(p);
+        this.minDate.set(p.date_debut ? new Date(p.date_debut) : null);
+        this.maxDate.set(p.date_fin_theorique ? new Date(p.date_fin_theorique) : null);
+        // Extract collaborator objects from the project
+        const collabs = p.collaborateurs as unknown as Collaborator[];
+        this.collaborators.set(collabs || []);
+      },
+    });
   }
 
   isSelected(id: string): boolean {
@@ -192,27 +189,15 @@ export class ProjectsCreateComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
 
-    const currentId = this.auth.currentUser()?._id;
-    const collaborateurs = currentId
-      ? [currentId, ...this.selectedCollaborators.filter((id) => id !== currentId)]
-      : this.selectedCollaborators;
-
-    const { budget_id, ...rest } = this.form.value;
-    const selectedBudget = this.budgets().find((b) => b._id === budget_id);
-
     const payload = {
-      ...rest,
-      code: this.generatedCode(),
-      statut: 'Initial',
-      chef_projet: currentId,
-      collaborateurs,
-      ligne_budgetaire: { id: budget_id, montant_restant: selectedBudget?.montant ?? 0 },
+      ...this.form.value,
+      collaborateurs: this.selectedCollaborators,
     };
 
-    this.projectService.create(payload).subscribe({
-      next: (p) => {
+    this.taskService.create(this.projectId, payload).subscribe({
+      next: () => {
         this.loading.set(false);
-        this.router.navigate(['/projects', p._id]);
+        this.router.navigate(['..'], { relativeTo: this.route });
       },
       error: (err) => {
         this.loading.set(false);

@@ -1,4 +1,6 @@
-export type ProjectStatus = 'Initial' | 'En cours' | 'Terminé' | 'Annulé' | 'Supprimé';
+import { Task } from './task.model';
+
+export type ProjectStatus = 'Initial' | 'En cours' | 'Terminé(e)' | 'Annulé(e)' | 'Archivé';
 
 export interface LigneBudgetaire {
   id: string;
@@ -17,6 +19,7 @@ export interface Project {
   collaborateurs?: Array<{ _id: string; nom: string; prenom: string; pseudo: string } | string>;
   ligne_budgetaire?: LigneBudgetaire;
   description?: string;
+  taches?: Task[];
   date_creation?: string;
   date_derniere_modif?: string;
 }

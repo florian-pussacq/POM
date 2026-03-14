@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard, roleGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'projects', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
   // Public: auth module
   {
@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./shared/components/layout/layout.component').then((m) => m.LayoutComponent),
     children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+      },
       {
         path: 'projects',
         loadChildren: () =>
@@ -59,5 +64,5 @@ export const routes: Routes = [
     ],
   },
 
-  { path: '**', redirectTo: 'projects' },
+  { path: '**', redirectTo: 'dashboard' },
 ];
