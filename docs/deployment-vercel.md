@@ -46,7 +46,7 @@ Avant de déployer le frontend, votre API doit être accessible sur internet.
 
 | Plateforme | Free tier | Instructions |
 |------------|-----------|--------------|
-| **Render** | ✅ | [render.com/docs/node](https://render.com/docs/node) |
+| **Render** | ✅ | 📖 [Guide complet → docs/deployment-render.md](./deployment-render.md) |
 | **Railway** | ✅ | [railway.app](https://railway.app) |
 | **Fly.io** | ✅ | `flyctl launch` dans `server-v2/` |
 

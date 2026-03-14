@@ -9,7 +9,7 @@ Application web de gestion de projets. Stack technique v2 :
 | Base de données | MongoDB 6+ (Mongoose 9) |
 | Auth | JWT (jsonwebtoken 9) |
 | Sécurité | Helmet, CORS, Rate-limit, express-validator, bcrypt |
-| Déploiement | Docker + Docker Compose · **Vercel** (frontend) |
+| Déploiement | Docker + Docker Compose · **Vercel** (frontend) · **Render** (backend) |
 
 ---
 
@@ -43,8 +43,10 @@ POM/
 │   └── Dockerfile              # Build multi-stage TypeScript → prod
 ├── docs/
 │   ├── specs/                  # Spécifications fonctionnelles complètes (12 fichiers)
-│   └── deployment-vercel.md    # Guide de déploiement Vercel (frontend)
+│   ├── deployment-vercel.md    # Guide de déploiement Vercel (frontend)
+│   └── deployment-render.md    # Guide de déploiement Render (backend)
 ├── docker-compose.yml  # Orchestration complète (MongoDB + API + Frontend)
+├── render.yaml         # Blueprint Render (infrastructure as code pour le backend)
 └── .gitignore
 ```
 
@@ -118,9 +120,30 @@ Le frontend Angular peut être déployé gratuitement sur [Vercel](https://verce
 
 📖 **Guide complet →** [`docs/deployment-vercel.md`](./docs/deployment-vercel.md)
 
+---
+
+## ☁️ Déploiement backend sur Render
+
+Le backend Node.js/TypeScript peut être déployé gratuitement sur [Render](https://render.com).
+**Pas besoin d'un repo séparé** — Render supporte les monorepos via le paramètre "Root Directory".
+
+**Configuration rapide (tableau de bord Render) :**
+
+| Paramètre Render | Valeur |
+|-----------------|--------|
+| Root Directory | `server-v2` |
+| Build Command | `npm ci && npm run build` |
+| Start Command | `npm start` |
+| Health Check Path | `/api/version` |
+| Variable d'env | `MONGODB_URI=mongodb+srv://...` |
+| Variable d'env | `JWT_SECRET=<64+ chars>` |
+| Variable d'env | `CORS_ORIGINS=https://pom-votrecompte.vercel.app` |
+
+Le fichier `render.yaml` à la racine du repo permet aussi un déploiement en **1 clic via Render Blueprint**.
+
+📖 **Guide complet →** [`docs/deployment-render.md`](./docs/deployment-render.md)
 
 
-## 📋 Documentation
 
 Toutes les spécifications fonctionnelles et techniques sont dans [`docs/specs/`](./docs/specs/) :
 
@@ -136,6 +159,7 @@ Toutes les spécifications fonctionnelles et techniques sont dans [`docs/specs/`
 - `10-api.md` – Documentation API REST complète
 - `11-deployment.md` – Déploiement Docker
 - [`deployment-vercel.md`](./docs/deployment-vercel.md) – **Déploiement Vercel (frontend)**
+- [`deployment-render.md`](./docs/deployment-render.md) – **Déploiement Render (backend)**
 
 ---
 
