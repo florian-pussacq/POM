@@ -1,59 +1,105 @@
-# ClientNg
+# POM – Frontend Angular (client-ng)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Application Angular 21 + Angular Material + Chart.js pour la gestion de projets POM.
 
-## Development server
+---
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 🛠 Développement local
 
 ```bash
-ng generate component component-name
+npm install
+npm start     # http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+> L'API doit être lancée sur `http://localhost:3000` (voir `server-v2/`).
+
+---
+
+## 📦 Commandes disponibles
+
+| Commande | Description |
+|----------|-------------|
+| `npm start` | Serveur de développement (port 4200, hot-reload) |
+| `npm run build` | Build standard (utilisé par Dockerfile) |
+| `npm run build:prod` | Build production avec injection de `API_URL` |
+| `npm test` | Tests unitaires (Vitest) |
+| `npm run watch` | Build en mode watch (développement) |
+
+---
+
+## ☁️ Déploiement sur Vercel
+
+Le frontend peut être déployé gratuitement sur [Vercel](https://vercel.com) en quelques clics.
+
+### Configuration Vercel (tableau de bord)
+
+| Paramètre | Valeur |
+|-----------|--------|
+| **Root Directory** | `client-ng` |
+| **Build Command** | `npm run build:prod` |
+| **Output Directory** | `dist/client-ng/browser` |
+| **Install Command** | `npm ci` |
+
+### Variable d'environnement Vercel
+
+| Nom | Valeur | Exemple |
+|-----|--------|---------|
+| `API_URL` | URL complète de votre API | `https://pom-api.onrender.com/api` |
+
+> Sans `API_URL`, l'application utilise `/api` (mode Docker/Nginx).
+
+### Déploiement via CLI
 
 ```bash
-ng generate --help
+npm i -g vercel
+vercel login
+
+# Depuis ce dossier (client-ng/)
+vercel --build-env API_URL=https://votre-api.onrender.com/api
 ```
 
-## Building
+📖 **Guide détaillé →** [`docs/deployment-vercel.md`](../docs/deployment-vercel.md)
 
-To build the project run:
+---
 
-```bash
-ng build
+## 🏗 Architecture du projet
+
+```
+src/
+├── app/
+│   ├── app.ts / app.routes.ts / app.config.ts
+│   ├── core/
+│   │   ├── guards/          # AuthGuard, RoleGuard
+│   │   ├── interceptors/    # JWT Bearer interceptor
+│   │   ├── models/          # Interfaces TypeScript (Project, Task, …)
+│   │   └── services/        # AuthService, ProjectService, …
+│   ├── features/            # Modules lazy-loaded par route
+│   │   ├── auth/            # Login, reset-password
+│   │   ├── dashboard/
+│   │   ├── projects/
+│   │   ├── tasks/
+│   │   ├── collaborators/
+│   │   ├── budgets/
+│   │   ├── statistics/
+│   │   └── account/
+│   └── shared/
+│       └── components/      # Layout, Restricted
+├── environments/
+│   ├── environment.ts        # Développement (localhost:3000)
+│   └── environment.prod.ts   # Production (généré par scripts/set-env.mjs)
+└── styles.scss
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## 🔧 Comment fonctionne l'injection d'URL d'API
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Le script `scripts/set-env.mjs` génère `src/environments/environment.prod.ts`
+en lisant la variable `API_URL` avant chaque build de production :
 
-```bash
-ng test
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+npm run build:prod
+  └─ node scripts/set-env.mjs   → lit API_URL, génère environment.prod.ts
+  └─ ng build --configuration=production
+       └─ compile avec environment.prod.ts → bundle final contient l'URL de l'API
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

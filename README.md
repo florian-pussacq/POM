@@ -9,7 +9,7 @@ Application web de gestion de projets. Stack technique v2 :
 | Base de données | MongoDB 6+ (Mongoose 9) |
 | Auth | JWT (jsonwebtoken 9) |
 | Sécurité | Helmet, CORS, Rate-limit, express-validator, bcrypt |
-| Déploiement | Docker + Docker Compose |
+| Déploiement | Docker + Docker Compose · **Vercel** (frontend) |
 
 ---
 
@@ -41,7 +41,9 @@ POM/
 │   ├── settings.json           # Référentiels (rôles, statuts, catégories…)
 │   ├── tsconfig.json
 │   └── Dockerfile              # Build multi-stage TypeScript → prod
-├── docs/specs/         # Spécifications fonctionnelles complètes (12 fichiers)
+├── docs/
+│   ├── specs/                  # Spécifications fonctionnelles complètes (12 fichiers)
+│   └── deployment-vercel.md    # Guide de déploiement Vercel (frontend)
 ├── docker-compose.yml  # Orchestration complète (MongoDB + API + Frontend)
 └── .gitignore
 ```
@@ -90,7 +92,33 @@ npm install
 ng serve           # http://localhost:4200
 ```
 
+**Commandes frontend :**
+
+| Commande | Description |
+|----------|-------------|
+| `npm run start` | Serveur de développement local (port 4200) |
+| `npm run build` | Build standard (pour Docker) |
+| `npm run build:prod` | Build production avec injection de l'URL d'API via `API_URL` |
+| `npm test` | Exécution des tests unitaires |
+
 ---
+
+## ☁️ Déploiement frontend sur Vercel
+
+Le frontend Angular peut être déployé gratuitement sur [Vercel](https://vercel.com).
+
+**Configuration rapide :**
+
+| Paramètre Vercel | Valeur |
+|-----------------|--------|
+| Root Directory | `client-ng` |
+| Build Command | `npm run build:prod` |
+| Output Directory | `dist/client-ng/browser` |
+| Variable d'env | `API_URL=https://votre-api.onrender.com/api` |
+
+📖 **Guide complet →** [`docs/deployment-vercel.md`](./docs/deployment-vercel.md)
+
+
 
 ## 📋 Documentation
 
@@ -107,6 +135,7 @@ Toutes les spécifications fonctionnelles et techniques sont dans [`docs/specs/`
 - `09-settings.md` – Référentiels
 - `10-api.md` – Documentation API REST complète
 - `11-deployment.md` – Déploiement Docker
+- [`deployment-vercel.md`](./docs/deployment-vercel.md) – **Déploiement Vercel (frontend)**
 
 ---
 
