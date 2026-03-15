@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ success: false, message: 'Non authentifié' }, { status: 401 });
     }
 
-    const userRole = (session.user as Record<string, unknown>).role as UserRole;
+    const userRole = (session.user as unknown as Record<string, unknown>).role as UserRole;
     if (userRole !== 'admin') {
       return NextResponse.json({ success: false, message: 'Accès refusé' }, { status: 403 });
     }
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Non authentifié' }, { status: 401 });
     }
 
-    const userRole = (session.user as Record<string, unknown>).role as UserRole;
+    const userRole = (session.user as unknown as Record<string, unknown>).role as UserRole;
     if (userRole !== 'admin') {
       return NextResponse.json({ success: false, message: 'Accès refusé' }, { status: 403 });
     }

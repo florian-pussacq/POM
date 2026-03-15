@@ -11,7 +11,7 @@ export default function CollaboratorsListPage() {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string;
+  const userRole = (session?.user as unknown as Record<string, unknown>)?.role as string;
 
   useEffect(() => {
     fetch('/api/collaborators')

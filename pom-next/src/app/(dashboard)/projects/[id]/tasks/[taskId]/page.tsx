@@ -29,7 +29,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
     selectedCollabs: [] as string[],
   });
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string;
+  const userRole = (session?.user as unknown as Record<string, unknown>)?.role as string;
   const canEdit = ['admin', 'manager'].includes(userRole);
 
   useEffect(() => {

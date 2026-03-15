@@ -17,7 +17,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const userId = session?.user?.id;
-  const userName = (session?.user as Record<string, unknown>)?.prenom as string || '';
+  const userName = (session?.user as unknown as Record<string, unknown>)?.prenom as string || '';
 
   useEffect(() => {
     if (!userId) return;

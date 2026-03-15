@@ -30,7 +30,7 @@ export async function PUT(request: Request) {
     }
 
     const user = db.getCollaboratorByPseudo(
-      (session.user as Record<string, unknown>).pseudo as string
+      (session.user as unknown as Record<string, unknown>).pseudo as string
     );
     if (!user || !user.mot_de_passe) {
       return NextResponse.json(

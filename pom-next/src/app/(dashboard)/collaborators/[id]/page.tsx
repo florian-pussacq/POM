@@ -19,7 +19,7 @@ export default function CollaboratorDetailPage({ params }: { params: Promise<{ i
     prenom: '', nom: '', email: '', role: '', fonction: '', cout_horaire: '0', manager: '',
   });
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string;
+  const userRole = (session?.user as unknown as Record<string, unknown>)?.role as string;
   const canEdit = ['admin', 'manager'].includes(userRole);
 
   useEffect(() => {

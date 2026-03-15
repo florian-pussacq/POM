@@ -46,20 +46,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as Record<string, unknown>).role;
-        token.pseudo = (user as Record<string, unknown>).pseudo;
-        token.prenom = (user as Record<string, unknown>).prenom;
-        token.nom = (user as Record<string, unknown>).nom;
+        token.role = (user as unknown as Record<string, unknown>).role;
+        token.pseudo = (user as unknown as Record<string, unknown>).pseudo;
+        token.prenom = (user as unknown as Record<string, unknown>).prenom;
+        token.nom = (user as unknown as Record<string, unknown>).nom;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as Record<string, unknown>).role = token.role;
-        (session.user as Record<string, unknown>).pseudo = token.pseudo;
-        (session.user as Record<string, unknown>).prenom = token.prenom;
-        (session.user as Record<string, unknown>).nom = token.nom;
+        (session.user as unknown as Record<string, unknown>).role = token.role;
+        (session.user as unknown as Record<string, unknown>).pseudo = token.pseudo;
+        (session.user as unknown as Record<string, unknown>).prenom = token.prenom;
+        (session.user as unknown as Record<string, unknown>).nom = token.nom;
       }
       return session;
     },

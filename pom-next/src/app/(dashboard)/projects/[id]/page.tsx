@@ -29,7 +29,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
     selectedCollabs: [] as string[],
   });
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string;
+  const userRole = (session?.user as unknown as Record<string, unknown>)?.role as string;
   const canEdit = ['admin', 'manager'].includes(userRole);
 
   useEffect(() => {

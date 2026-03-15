@@ -31,8 +31,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string || 'collaborateur';
-  const userName = (session?.user as Record<string, unknown>)?.prenom as string || 'Utilisateur';
+  const userRole = session?.user?.role as string || 'collaborateur';
+  const userName = session?.user?.prenom as string || 'Utilisateur';
 
   const filteredNav = navItems.filter(item => item.roles.includes(userRole));
 

@@ -19,7 +19,7 @@ export default function CollaboratorCreatePage() {
     role: 'collaborateur', fonction: '', cout_horaire: '0', manager: '',
   });
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string;
+  const userRole = (session?.user as unknown as Record<string, unknown>)?.role as string;
 
   useEffect(() => {
     fetch('/api/collaborators').then(r => r.json()).then(data => {
