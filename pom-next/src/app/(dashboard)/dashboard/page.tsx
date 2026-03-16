@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { ListTodo, AlertTriangle, Clock, CheckCircle, XCircle, FolderKanban } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [projects, setProjects] = useState<Project[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -20,7 +20,11 @@ export default function DashboardPage() {
   const userName = (session?.user as unknown as Record<string, unknown>)?.prenom as string || '';
 
   useEffect(() => {
-    if (!userId) return;
+    if (status === 'loading') return;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
     
     Promise.all([
       fetch(`/api/collaborators/${userId}/projects`).then(r => r.json()).catch(() => []),
@@ -32,7 +36,7 @@ export default function DashboardPage() {
       setBudgets(Array.isArray(budgetsData) ? budgetsData : []);
       setLoading(false);
     });
-  }, [userId]);
+  }, [userId, status]);
 
   // Get all tasks from active projects that belong to the user
   const activeProjects = projects.filter(p => p.statut === 'En cours');
