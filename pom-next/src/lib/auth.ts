@@ -2,8 +2,10 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import bcryptjs from 'bcryptjs';
 import { db } from '@/lib/data/store';
+import { authConfig } from '@/lib/auth.config';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       name: 'credentials',
@@ -39,10 +41,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: 'jwt',
     maxAge: 8 * 60 * 60, // 8 hours
   },
-  pages: {
-    signIn: '/login',
-  },
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
