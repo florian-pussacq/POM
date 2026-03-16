@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+const NAVIGATION_TIMEOUT = 10_000;
+
 test.describe('Authentication flow', () => {
   test.describe('Unauthenticated access', () => {
     test('root page redirects to login', async ({ page }) => {
@@ -34,8 +36,8 @@ test.describe('Authentication flow', () => {
       await page.locator('input#password').fill('admin123');
       await page.getByRole('button', { name: /se connecter/i }).click();
 
-      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-      await expect(page.locator('text=Bonjour')).toBeVisible({ timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: NAVIGATION_TIMEOUT });
+      await expect(page.locator('text=Bonjour')).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
     });
 
     test('login with wrong credentials shows error', async ({ page }) => {
@@ -45,7 +47,7 @@ test.describe('Authentication flow', () => {
       await page.locator('input#password').fill('wrongpassword');
       await page.getByRole('button', { name: /se connecter/i }).click();
 
-      await expect(page.locator('text=Identifiants incorrects')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('text=Identifiants incorrects')).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
       await expect(page).toHaveURL(/\/login/);
     });
   });
@@ -57,11 +59,11 @@ test.describe('Authentication flow', () => {
       await page.locator('input#pseudo').fill('admin');
       await page.locator('input#password').fill('admin123');
       await page.getByRole('button', { name: /se connecter/i }).click();
-      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: NAVIGATION_TIMEOUT });
 
       // Logout
       await page.getByRole('button', { name: /déconnexion/i }).click();
-      await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/login/, { timeout: NAVIGATION_TIMEOUT });
     });
 
     test('user can login again after logout without server error', async ({ page }) => {
@@ -70,19 +72,19 @@ test.describe('Authentication flow', () => {
       await page.locator('input#pseudo').fill('admin');
       await page.locator('input#password').fill('admin123');
       await page.getByRole('button', { name: /se connecter/i }).click();
-      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: NAVIGATION_TIMEOUT });
 
       // Logout
       await page.getByRole('button', { name: /déconnexion/i }).click();
-      await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/login/, { timeout: NAVIGATION_TIMEOUT });
 
       // Re-login with different user
       await page.locator('input#pseudo').fill('smartin');
       await page.locator('input#password').fill('manager123');
       await page.getByRole('button', { name: /se connecter/i }).click();
 
-      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-      await expect(page.locator('text=Bonjour')).toBeVisible({ timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: NAVIGATION_TIMEOUT });
+      await expect(page.locator('text=Bonjour')).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
     });
   });
 
@@ -93,11 +95,11 @@ test.describe('Authentication flow', () => {
       await page.locator('input#pseudo').fill('admin');
       await page.locator('input#password').fill('admin123');
       await page.getByRole('button', { name: /se connecter/i }).click();
-      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: NAVIGATION_TIMEOUT });
 
       // Try to visit login page while authenticated
       await page.goto('/login');
-      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: NAVIGATION_TIMEOUT });
     });
   });
 });
